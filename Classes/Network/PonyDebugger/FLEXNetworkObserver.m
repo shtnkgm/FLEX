@@ -656,29 +656,30 @@ didBecomeDownloadTask:(NSURLSessionDownloadTask *)downloadTask delegate:(id <NSU
 
 + (void)injectTaskWillPerformHTTPRedirectionIntoDelegateClass:(Class)cls
 {
-    SEL selector = @selector(URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:);
-    SEL swizzledSelector = [FLEXUtility swizzledSelectorForSelector:selector];
-
-    Protocol *protocol = @protocol(NSURLSessionTaskDelegate);
-
-    struct objc_method_description methodDescription = protocol_getMethodDescription(protocol, selector, NO, YES);
-    
-    typedef void (^NSURLSessionWillPerformHTTPRedirectionBlock)(id <NSURLSessionTaskDelegate> slf, NSURLSession *session, NSURLSessionTask *task, NSHTTPURLResponse *response, NSURLRequest *newRequest, void(^completionHandler)(NSURLRequest *));
-    
-    NSURLSessionWillPerformHTTPRedirectionBlock undefinedBlock = ^(id <NSURLSessionTaskDelegate> slf, NSURLSession *session, NSURLSessionTask *task, NSHTTPURLResponse *response, NSURLRequest *newRequest, void(^completionHandler)(NSURLRequest *)) {
-        [[FLEXNetworkObserver sharedObserver] URLSession:session task:task willPerformHTTPRedirection:response newRequest:newRequest completionHandler:completionHandler delegate:slf];
-        completionHandler(newRequest);
-    };
-
-    NSURLSessionWillPerformHTTPRedirectionBlock implementationBlock = ^(id <NSURLSessionTaskDelegate> slf, NSURLSession *session, NSURLSessionTask *task, NSHTTPURLResponse *response, NSURLRequest *newRequest, void(^completionHandler)(NSURLRequest *)) {
-        [self sniffWithoutDuplicationForObject:session selector:selector sniffingBlock:^{
-            [[FLEXNetworkObserver sharedObserver] URLSession:session task:task willPerformHTTPRedirection:response newRequest:newRequest completionHandler:completionHandler delegate:slf];
-        } originalImplementationBlock:^{
-            ((id(*)(id, SEL, id, id, id, id, void(^)(NSURLRequest *)))objc_msgSend)(slf, swizzledSelector, session, task, response, newRequest, completionHandler);
-        }];
-    };
-
-    [FLEXUtility replaceImplementationOfSelector:selector withSelector:swizzledSelector forClass:cls withMethodDescription:methodDescription implementationBlock:implementationBlock undefinedBlock:undefinedBlock];
+    // クラッシュ回避のため、コメントアウトする
+//    SEL selector = @selector(URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:);
+//    SEL swizzledSelector = [FLEXUtility swizzledSelectorForSelector:selector];
+//
+//    Protocol *protocol = @protocol(NSURLSessionTaskDelegate);
+//
+//    struct objc_method_description methodDescription = protocol_getMethodDescription(protocol, selector, NO, YES);
+//
+//    typedef void (^NSURLSessionWillPerformHTTPRedirectionBlock)(id <NSURLSessionTaskDelegate> slf, NSURLSession *session, NSURLSessionTask *task, NSHTTPURLResponse *response, NSURLRequest *newRequest, void(^completionHandler)(NSURLRequest *));
+//
+//    NSURLSessionWillPerformHTTPRedirectionBlock undefinedBlock = ^(id <NSURLSessionTaskDelegate> slf, NSURLSession *session, NSURLSessionTask *task, NSHTTPURLResponse *response, NSURLRequest *newRequest, void(^completionHandler)(NSURLRequest *)) {
+//        [[FLEXNetworkObserver sharedObserver] URLSession:session task:task willPerformHTTPRedirection:response newRequest:newRequest completionHandler:completionHandler delegate:slf];
+//        completionHandler(newRequest);
+//    };
+//
+//    NSURLSessionWillPerformHTTPRedirectionBlock implementationBlock = ^(id <NSURLSessionTaskDelegate> slf, NSURLSession *session, NSURLSessionTask *task, NSHTTPURLResponse *response, NSURLRequest *newRequest, void(^completionHandler)(NSURLRequest *)) {
+//        [self sniffWithoutDuplicationForObject:session selector:selector sniffingBlock:^{
+//            [[FLEXNetworkObserver sharedObserver] URLSession:session task:task willPerformHTTPRedirection:response newRequest:newRequest completionHandler:completionHandler delegate:slf];
+//        } originalImplementationBlock:^{
+//            ((id(*)(id, SEL, id, id, id, id, void(^)(NSURLRequest *)))objc_msgSend)(slf, swizzledSelector, session, task, response, newRequest, completionHandler);
+//        }];
+//    };
+//
+//    [FLEXUtility replaceImplementationOfSelector:selector withSelector:swizzledSelector forClass:cls withMethodDescription:methodDescription implementationBlock:implementationBlock undefinedBlock:undefinedBlock];
 
 }
 
