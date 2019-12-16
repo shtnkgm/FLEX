@@ -330,7 +330,15 @@
 {
     [self onBackgroundQueue:^NSArray *{
         return [self.networkTransactions filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(FLEXNetworkTransaction *transaction, NSDictionary<NSString *, id> *bindings) {
-            return [[transaction.request.URL absoluteString] rangeOfString:searchString options:NSCaseInsensitiveSearch].length > 0;
+            
+            if ([searchString length] <= 0) {
+                return false;
+            }
+
+            const NSString *transactionURLString = [transaction.request.URL absoluteString];
+            if ([transactionURLString length] <= 0) { return false; }
+
+            return [transactionURLString rangeOfString:searchString options:NSCaseInsensitiveSearch].length > 0;
         }]];
     } thenOnMainQueue:^(NSArray *filteredNetworkTransactions) {
         if ([self.searchText isEqual:searchString]) {
